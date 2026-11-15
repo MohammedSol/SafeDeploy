@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-compose:
+    name: Validate docker-compose config
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du dépôt
+        uses: actions/checkout@v4
+
+      - name: Copier .env.example en .env
+        run: cp .env.example .env
+
+      - name: Valider la configuration Docker Compose
+        run: docker compose config --quiet
+
+      - name: Vérifier la syntaxe du init.sql (présence des tables attendues)
+        run: |
+          grep -q "CREATE TABLE IF NOT EXISTS sales_monthly" infra/postgres/init.sql
+          grep -q "CREATE TABLE IF NOT EXISTS predictions" infra/postgres/init.sql
+          echo "init.sql : tables sales_monthly et predictions présentes."
