@@ -1,0 +1,71 @@
+services:
+
+  # ----------------------------------------------------------------
+  # PostgreSQL 16 — base de données principale
+  # ----------------------------------------------------------------
+  postgres:
+    image: postgres:16.3-alpine
+    container_name: safedeploy_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - safedeploy_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ----------------------------------------------------------------
+  # MLflow — tracking server + model registry
+  # Lancé avec --serve-artifacts : les modèles sont servis en HTTP,
+  # pas besoin de volume partagé avec le backend ou le trainer.
+  # ----------------------------------------------------------------
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.19.0
+    container_name: safedeploy_mlflow
+    restart: unless-stopped
+    command: >
+      mlflow server
+      --backend-store-uri ${MLFLOW_BACKEND_STORE_URI:-sqlite:////mlflow/mlflow.db}
+      --serve-artifacts
+      --artifacts-destination ${MLFLOW_ARTIFACTS_DESTINATION:-/mlflow/artifacts}
+      --host 0.0.0.0
+      --port 5000
+    volumes:
+      - mlflow_data:/mlflow
+    ports:
+      - "${MLFLOW_PORT:-5000}:5000"
+    networks:
+      - safedeploy_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+# ----------------------------------------------------------------
+# Volumes nommés — les données persistent entre `make down` et `make up`
+# ----------------------------------------------------------------
+volumes:
+  postgres_data:
+    driver: local
+  mlflow_data:
+    driver: local
+
+# ----------------------------------------------------------------
+# Réseau dédié — isolation des services SafeDeploy
+# ----------------------------------------------------------------
+networks:
+  safedeploy_net:
+    driver: bridge
