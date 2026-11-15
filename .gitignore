@@ -22,7 +22,8 @@ var/
 sdist/
 develop-eggs/
 .installed.cfg
-lib/
+# Note : lib/ Python exclue, mais pas frontend/src/lib (TypeScript)
+*.egg-link
 lib64/
 *.so
 .venv/
