@@ -1,0 +1,74 @@
+# ============================================================
+# SafeDeploy — .gitignore
+# ============================================================
+
+# --- Secrets et configuration locale ---
+.env
+*.env.local
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+*.so
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+
+# --- Docker ---
+# Volumes Docker montés localement (si dev)
+mlflow_data/
+postgres_data/
+
+# --- Données brutes et modèles locaux ---
+backend/data/sales.csv
+mlruns/
+mlflow.db
+*.pkl
+*.joblib
+
+# --- IDEs et OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs ---
+*.log
+logs/
