@@ -27,3 +27,7 @@ logs: ## Affiche les logs de tous les services
 # Arrête les services ET supprime les volumes (réinitialisation complète)
 clean: ## Arrête les services et supprime les volumes (DESTRUCTIF)
 	docker compose down -v
+
+	.PHONY: train
+train:
+	docker compose run --rm trainer
